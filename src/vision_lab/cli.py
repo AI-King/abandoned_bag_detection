@@ -25,6 +25,21 @@ def main():
     infer.add_argument("--alert-seconds", type=float, default=300)
     infer.add_argument("--stationary-seconds", type=float, default=3)
     infer.add_argument("--proximity-ratio", type=float, default=0.65)
+    infer.add_argument(
+        "--tracker",
+        choices=["ilp", "bytetrack"],
+        default="ilp",
+        help="Tracker type: ilp (Integer Linear Programming) or bytetrack",
+    )
+    extend = commands.add_parser(
+        "extend", help="Extend a surveillance video to a longer test duration"
+    )
+    extend.add_argument("source", type=Path, help="Input video path")
+    extend.add_argument("--seconds", type=float, default=60.0, help="Target duration in seconds")
+    extend.add_argument("--output", type=Path, default=None, help="Output video path")
+    extend.add_argument(
+        "--with-pickup", action="store_true", help="Include return-and-pickup sequence"
+    )
     for name in ("train", "evaluate"):
         command = commands.add_parser(name)
         command.add_argument("--data", type=Path, default=Path("data/datasets/coco8.yaml"))
@@ -56,6 +71,7 @@ def main():
                 confidence=args.confidence,
                 image_size=args.image_size,
                 device=args.device,
+                tracker_type=args.tracker,
                 max_frames=args.max_frames,
             ),
             MonitorConfig(
@@ -74,6 +90,12 @@ def main():
         from vision_lab.training import evaluate
 
         print(json.dumps(evaluate(args.data, args.model, args.image_size, args.device), indent=2))
+    elif args.command == "extend":
+        from vision_lab.generators import extend_surveillance_video
+
+        target = args.output or args.source.parent / f"{args.source.stem}_{int(args.seconds)}s.mp4"
+        out = extend_surveillance_video(args.source, target, args.seconds, args.with_pickup)
+        print(f"Generated extended video: {out}")
 
 
 if __name__ == "__main__":

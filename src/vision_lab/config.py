@@ -17,10 +17,13 @@ class InferenceConfig:
     image_size: int = 640
     device: str = "cpu"
     tracking: bool = True
+    tracker_type: str = "ilp"
     max_frames: int | None = None
     classes: tuple[int, ...] | None = None
 
     def __post_init__(self) -> None:
+        if self.tracker_type not in ("ilp", "bytetrack"):
+            raise ValueError("tracker_type must be 'ilp' or 'bytetrack'.")
         if not 0 < self.confidence <= 1 or not 0 < self.iou <= 1:
             raise ValueError("Confidence and IoU must be in (0, 1].")
         if not 32 <= self.image_size <= 1920 or self.image_size % 32:

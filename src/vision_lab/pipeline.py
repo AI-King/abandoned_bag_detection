@@ -14,6 +14,7 @@ import mlflow
 
 from vision_lab.analytics import Analytics
 from vision_lab.config import InferenceConfig, workspace
+from vision_lab.ilp_tracker import ILPTracker
 from vision_lab.media import to_browser_video
 from vision_lab.provenance import sha256
 from vision_lab.tracking import tracked_run
@@ -169,6 +170,9 @@ def process_video(
                 mlflow.log_params({f"monitor.{k}": v for k, v in asdict(monitor_config).items()})
             (output / "config.json").write_text(json.dumps(metadata, indent=2))
             model = model_factory(config.model)  # Fresh tracker state for every video/run.
+            ilp_tracker = (
+                ILPTracker() if (config.tracking and config.tracker_type == "ilp") else None
+            )
             class_filter = config.classes
             if monitor and class_filter is None:
                 class_filter = tuple(
@@ -210,13 +214,22 @@ def process_video(
                         "classes": list(class_filter) if class_filter is not None else None,
                         "verbose": False,
                     }
-                    if config.tracking:
+                    if ilp_tracker is not None:
+                        predict_fn = getattr(model, "predict", model.track)
+                        result = predict_fn(frame, **kwargs)[0]
+                        detections = result_detections(result)
+                        for d in detections:
+                            d["track_id"] = None
+                        detections = ilp_tracker.update(detections, width, height, timestamp)
+                    elif config.tracking:
                         result = model.track(
                             frame, persist=True, tracker="bytetrack.yaml", **kwargs
                         )[0]
+                        detections = result_detections(result)
                     else:
-                        result = model.predict(frame, **kwargs)[0]
-                    detections = result_detections(result)
+                        predict_fn = getattr(model, "predict", model.track)
+                        result = predict_fn(frame, **kwargs)[0]
+                        detections = result_detections(result)
                     bag_rows = (
                         monitor.update(timestamp, detections, width, height) if monitor else []
                     )

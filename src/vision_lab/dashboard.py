@@ -170,13 +170,46 @@ def main():
         upload = None
         source = None
         if source_kind == "Public demo":
-            scenarios = ["LeftBag", "LeftBag_PickedUp"]
-            if (root / "data/videos/Synthetic_Timer_310s.mp4").exists():
-                scenarios.append("Synthetic_Timer_310s")
+            video_files = []
+            for folder in [root / "data/test", root / "data/videos"]:
+                if folder.exists():
+                    video_files.extend(sorted(folder.glob("*.mp4")) + sorted(folder.glob("*.avi")))
+            seen_stems = set()
+            available_paths = []
+            for vf in video_files:
+                if vf.stem not in seen_stems:
+                    seen_stems.add(vf.stem)
+                    available_paths.append(vf)
+
+            def sort_key(p):
+                name = p.stem
+                if "generate" in name or "cctv" in name:
+                    return (0, 0, name)
+                if name.startswith("aboda_video"):
+                    try:
+                        num = int(name.replace("aboda_video", ""))
+                        return (1, num, name)
+                    except ValueError:
+                        return (1, 99, name)
+                if name == "LeftBag":
+                    return (2, 0, name)
+                if name == "LeftBag_PickedUp":
+                    return (2, 1, name)
+                if name == "Synthetic_Timer_310s":
+                    return (3, 0, name)
+                return (4, 0, name)
+
+            available_paths.sort(key=sort_key)
+            scenarios = [p.stem for p in available_paths] or ["LeftBag", "LeftBag_PickedUp"]
             selected = st.selectbox("Scenario", scenarios)
-            source = root / f"data/videos/{selected}.mp4"
+            default_path = root / f"data/videos/{selected}.mp4"
+            source = next((p for p in available_paths if p.stem == selected), default_path)
             if selected == "Synthetic_Timer_310s":
                 st.caption("Synthetic repeated COCO photo · Timer verification only")
+            elif "cctv" in selected.lower() or "generate" in selected.lower():
+                st.caption("CCTV test video · Person with suitcase leaves it · Unattended event")
+            elif "aboda" in selected.lower():
+                st.caption(f"ABODA Benchmark ({selected}) · Real surveillance abandoned object")
             else:
                 st.caption("CAVIAR project · CC BY-SA · INRIA lobby footage")
         else:
@@ -188,6 +221,12 @@ def main():
         )
         model = st.selectbox("YOLO model", models, format_func=lambda p: p.name) if models else None
         confidence = st.slider("Detection confidence", 0.05, 0.9, 0.3, 0.05)
+        tracker_choice = st.selectbox(
+            "Tracking engine",
+            ["ILP (Integer Linear Programming)", "ByteTrack (Standard MOT)"],
+            help="ILP uses mathematical optimization to preserve bag IDs across class flips.",
+        )
+        tracker_type = "ilp" if "ILP" in tracker_choice else "bytetrack"
         alert_seconds = st.number_input(
             "Unattended threshold (seconds)", min_value=1, max_value=3600, value=300, step=5
         )
@@ -239,6 +278,7 @@ def main():
                         model=str(model),
                         confidence=confidence,
                         image_size=image_size,
+                        tracker_type=tracker_type,
                         max_frames=limit or None,
                     ),
                     MonitorConfig(
