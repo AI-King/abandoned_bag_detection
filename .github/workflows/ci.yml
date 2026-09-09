@@ -46,3 +46,27 @@ jobs:
         with:
           name: smoke-training
           path: outputs/training/
+  container:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: false
+          load: true
+          tags: vision-lab:ci
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+      - name: Check imports as the container user
+        run: docker run --rm vision-lab:ci python -c "import cv2; import torch; import vision_lab.dashboard"
+      - name: Check dashboard health
+        run: |
+          docker run -d --name vision-ci -p 127.0.0.1:8501:8501 vision-lab:ci
+          for attempt in $(seq 1 30); do
+            if curl --fail http://127.0.0.1:8501/_stcore/health; then exit 0; fi
+            sleep 2
+          done
+          docker logs vision-ci
+          exit 1

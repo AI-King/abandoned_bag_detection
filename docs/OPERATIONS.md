@@ -65,7 +65,8 @@ CPU PyTorch is locked for reproducibility; CUDA is not configured.
 
 ## CI and delivery
 
-CI runs Ruff, formatting and pytest on Ubuntu/Windows. A Linux smoke job downloads
+CI builds the non-root container and checks its imports and dashboard health.
+It also runs Ruff, formatting and pytest on Ubuntu/Windows. A Linux smoke job downloads
 verified assets, runs real YOLO inference and trains one COCO8 epoch. Release tags
 (`v*`) trigger quality checks, a container build and publication to
 `ghcr.io/AI-King/abandoned_bag_detection`. This delivers an image; it does not update
