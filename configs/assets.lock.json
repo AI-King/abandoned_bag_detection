@@ -1,0 +1,30 @@
+{
+  "coco8.zip": {
+    "url": "https://github.com/ultralytics/assets/releases/download/v0.0.0/coco8.zip",
+    "sha256": "54c67fe9ef88313e021ec0e92b73c200167bb0a86633e8df8658d832cca828c9"
+  },
+  "LeftBag.mpg": {
+    "url": "https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/LeftBag/LeftBag.mpg",
+    "sha256": "8f5d1dbf43d58da1bce57ca1b3f9491b8467773cfd66d2846f62f7d38d4a45e7"
+  },
+  "lb1gt.xml": {
+    "url": "https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/LeftBag/lb1gt.xml",
+    "sha256": "9599de02b41369065f1c718ec9c934bf1d58b65dc969b88e36c08ca54ab52bb7"
+  },
+  "LeftBag_PickedUp.mpg": {
+    "url": "https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/LeftBag_PickedUp/LeftBag_PickedUp.mpg",
+    "sha256": "39e1ad6e486460aaa2a99a7df55bc366f4d744620f4ce0f85195a9b251ce2aa2"
+  },
+  "lbpugt.xml": {
+    "url": "https://homepages.inf.ed.ac.uk/rbf/CAVIARDATA1/LeftBag_PickedUp/lbpugt.xml",
+    "sha256": "46a99722f82b7537fcd318aa15f79acaaefac922443af272655cd034c07d30b4"
+  },
+  "yolo11n.pt": {
+    "url": "https://github.com/ultralytics/assets/releases/download/v8.3.0/yolo11n.pt",
+    "sha256": "0ebbc80d4a7680d14987a577cd21342b65ecfd94632bd9a8da63ae6417644ee1"
+  },
+  "coco128.zip": {
+    "url": "https://github.com/ultralytics/assets/releases/download/v0.0.0/coco128.zip",
+    "sha256": "61e5e3028863d8ffc3b81d6a514603954889f0edd5e4b44c4ce60b2da99aeb8e"
+  }
+}

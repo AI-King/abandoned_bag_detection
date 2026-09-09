@@ -1,0 +1,16 @@
+.git
+.venv
+data
+models
+outputs
+mlartifacts
+mlruns
+*.db*
+logs
+__pycache__
+.pytest_cache
+.ruff_cache
+.coverage
+coverage.xml
+.env
+.streamlit/secrets.toml

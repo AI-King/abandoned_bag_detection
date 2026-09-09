@@ -1,0 +1,26 @@
+services:
+  prepare:
+    build: .
+    profiles: [setup]
+    environment:
+      VISION_WORKSPACE: /workspace
+    volumes:
+      - vision-data:/workspace
+    command: [python, -c, "from pathlib import Path; from vision_lab.data import prepare_assets; prepare_assets(Path('/workspace'), Path('/app/configs/assets.lock.json'))"]
+  dashboard:
+    build: .
+    ports: ["127.0.0.1:8501:8501"]
+    volumes:
+      - vision-data:/workspace
+    restart: unless-stopped
+  mlflow:
+    build: .
+    ports: ["127.0.0.1:5000:5000"]
+    volumes:
+      - vision-data:/workspace
+    command: [mlflow, "ui", "--backend-store-uri", "sqlite:////workspace/mlflow.db", "--host", "0.0.0.0", "--port", "5000"]
+    healthcheck:
+      test: [CMD, python, -c, "import urllib.request; urllib.request.urlopen('http://127.0.0.1:5000/health')"]
+    restart: unless-stopped
+volumes:
+  vision-data:

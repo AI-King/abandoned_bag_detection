@@ -1,0 +1,11 @@
+# Use an absolute dataset root with images/ and labels/ directories.
+# Split by camera/day/scene, not adjacent frames from the same video.
+path: /absolute/path/to/station-luggage
+train: images/train
+val: images/val
+names:
+  0: person
+  1: backpack
+  2: handbag
+  3: suitcase
+  4: bag
